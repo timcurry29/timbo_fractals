@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Timbo_Fractals — Fractal VJ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0e0800;
+      --surface: #1a0e00;
+      --border: rgba(255,140,0,0.12);
+      --accent: #ff6a00;
+      --accent2: #ffc200;
+      --text: #fff5e6;
+      --muted: rgba(255,245,230,0.45);
+      --font-display: 'Syne', sans-serif;
+      --font-mono: 'DM Mono', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-display);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 40px;
+      background: rgba(14,8,0,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.08em;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--accent); }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      gap: 60px;
+      padding: 120px 40px 60px;
+      position: relative;
+    }
+
+    .hero-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .hero-image {
+      position: relative;
+      border-radius: 6px;
+      overflow: hidden;
+      aspect-ratio: 16/9;
+      border: 1px solid rgba(255,140,0,0.2);
+      box-shadow: 0 0 60px rgba(255,106,0,0.15), 0 0 120px rgba(255,106,0,0.05);
+    }
+
+    .hero-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; gap: 40px; }
+      .hero-image { order: -1; }
+    }
+
+    .hero-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.25em;
+      color: var(--accent2);
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+
+    .hero h1 {
+      font-size: clamp(40px, 7vw, 90px);
+      font-weight: 800;
+      line-height: 1.0;
+      letter-spacing: -0.02em;
+      max-width: 800px;
+    }
+
+    .hero h1 span { color: var(--accent); }
+
+    .hero-sub {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 24px;
+      max-width: 500px;
+      line-height: 1.8;
+    }
+
+    .hero-cta {
+      display: flex;
+      gap: 16px;
+      margin-top: 40px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 14px 28px;
+      border-radius: 2px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #1a0500;
+      border: 1px solid var(--accent);
+    }
+
+    .btn-primary:hover { background: #ff8c2a; }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── SECTION SHARED ── */
+    section {
+      padding: 80px 40px;
+    }
+
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.25em;
+      color: var(--accent2);
+      text-transform: uppercase;
+      margin-bottom: 40px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+      max-width: 200px;
+    }
+
+    /* ── SIZZLE REEL ── */
+    #reel {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .reel-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 960px;
+      margin: 0 auto;
+      aspect-ratio: 16/9;
+      background: #000;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    /* YouTube embed — replace VIDEO_ID below */
+    .reel-wrapper iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    /* Placeholder shown when no iframe */
+    .reel-placeholder {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      border: 1px dashed rgba(255,140,0,0.15);
+      border-radius: 4px;
+    }
+
+    .reel-placeholder .play-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,106,0,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ── CLIP GRID ── */
+    .clip-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .clip-item {
+      position: relative;
+      aspect-ratio: 16/9;
+      background: #000;
+      border-radius: 4px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .clip-item:hover {
+      border-color: var(--accent);
+      transform: scale(1.01);
+    }
+
+    /* Local video — edit src per item */
+    .clip-item video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* YouTube clip embed */
+    .clip-item iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      pointer-events: none;
+    }
+
+    .clip-item:hover iframe { pointer-events: auto; }
+
+    .clip-label {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 24px 12px 10px;
+      background: linear-gradient(transparent, rgba(0,0,0,0.8));
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: rgba(255,255,255,0.75);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .clip-item:hover .clip-label { opacity: 1; }
+
+    /* ── ABOUT ── */
+    #about {
+      max-width: 760px;
+    }
+
+    .about-text {
+      font-size: clamp(16px, 2vw, 20px);
+      font-weight: 400;
+      line-height: 1.7;
+      color: var(--muted);
+      margin-bottom: 40px;
+    }
+
+    .about-text strong { color: var(--text); font-weight: 700; }
+
+    .tech-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tech-tag {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 6px 14px;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+    }
+
+    /* ── CONTACT ── */
+    #contact {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      text-align: center;
+    }
+
+    #contact h2 {
+      font-size: clamp(28px, 5vw, 56px);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+    }
+
+    #contact h2 span { color: var(--accent); }
+
+    #contact p {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 40px;
+    }
+
+    .contact-links {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 24px 40px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    footer p {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      nav { padding: 16px 20px; }
+      .nav-links { gap: 20px; }
+      section { padding: 60px 20px; }
+      .hero { padding: 100px 20px 40px; }
+      footer { flex-direction: column; gap: 8px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── NAV ── -->
+  <nav>
+    <div class="nav-logo">Timbo_Fractals</div>
+    <ul class="nav-links">
+      <li><a href="#reel">Reel</a></li>
+      <li><a href="#clips">Clips</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#contact">Book</a></li>
+    </ul>
+  </nav>
+
+
+  <!-- ── HERO ── -->
+  <section class="hero">
+    <div class="hero-text">
+      <p class="hero-eyebrow">Timbo_Fractals · Live Visuals</p>
+      <h1>High Quality<br /><span>Fractal Loops</span><br />for Live Stages.</h1>
+      <p class="hero-sub">
+        Visuals rendered in Unreal Engine and performed in Resolume.<br />
+        Available for festivals, clubs, and installations.
+      </p>
+      <div class="hero-cta">
+        <a href="#reel" class="btn btn-primary">Watch the reel</a>
+        <a href="#contact" class="btn btn-outline">Book a show</a>
+      </div>
+    </div>
+    <div class="hero-image">
+      <img src="flow22LevelSequence.0171.png" alt="Fractal render by Timbo_Fractals" />
+    </div>
+  </section>
+
+
+  <!-- ── SIZZLE REEL ── -->
+  <section id="reel">
+    <p class="section-label">Sizzle reel</p>
+    <div class="reel-wrapper">
+
+      <iframe src="https://www.youtube.com/embed/XN5F2fkM9kY?rel=0" allowfullscreen></iframe>
+
+    </div>
+  </section>
+
+
+  <!-- ── CLIP GALLERY ── -->
+  <section id="clips">
+    <p class="section-label">Clip gallery</p>
+    <div class="clip-grid">
+
+      <div class="clip-item" data-src="https://www.youtube.com/embed/k3N6-xNQje8?mute=1&rel=0&autoplay=1">
+        <iframe src="https://www.youtube.com/embed/k3N6-xNQje8?mute=1&rel=0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        <div class="clip-label">Flow Source Emergence</div>
+      </div>
+
+      <div class="clip-item" data-src="https://www.youtube.com/embed/QcCmSJIKOTc?mute=1&rel=0&autoplay=1">
+        <iframe src="https://www.youtube.com/embed/QcCmSJIKOTc?mute=1&rel=0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        <div class="clip-label">Flow Tost</div>
+      </div>
+
+      <div class="clip-item" data-src="https://www.youtube.com/embed/m1Lp6y4S1Xg?mute=1&rel=0&autoplay=1">
+        <iframe src="https://www.youtube.com/embed/m1Lp6y4S1Xg?mute=1&rel=0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        <div class="clip-label">Flow 13 Sizzle</div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ── ABOUT ── -->
+  <section id="about">
+    <p class="section-label">About</p>
+    <p class="about-text">
+      <strong>My name is Tim Curry</strong>, based out of Queens, NY. I've been working on this project for 3+ years and want to share it with the community. Fractals are part of the natural formula of the world and deserve to be rendered in the highest quality — and twisted in all the right ways on the big screen.
+    </p>
+    <p class="about-text">
+      Available for <strong>festivals, club nights, and art installations.</strong>
+      Custom palettes and themed clip packs on request.
+    </p>
+    <div class="tech-tags">
+      <span class="tech-tag">Unreal Engine</span>
+      <span class="tech-tag">Resolume Arena</span>
+      <span class="tech-tag">4K output</span>
+      <span class="tech-tag">HAP / ProRes</span>
+      <span class="tech-tag">LED walls</span>
+    </div>
+  </section>
+
+
+  <!-- ── CONTACT ── -->
+  <section id="contact">
+    <h2>Let's work<br /><span>together.</span></h2>
+    <p>Festival bookings, installations, clip licensing</p>
+    <div class="contact-links">
+      <a href="mailto:timcurry29@gmail.com" class="btn btn-primary">Email me</a>
+      <a href="https://www.instagram.com/timbo_fractals" target="_blank" class="btn btn-outline">Instagram</a>
+      <a href="https://www.youtube.com/@timbo_fractals" target="_blank" class="btn btn-outline">Youtube</a>
+      <!-- Add Linktree, Vimeo, etc. here -->
+    </div>
+  </section>
+
+
+  <!-- ── FOOTER ── -->
+  <footer>
+    <p>© 2025 Timbo_Fractals</p>
+    <p>Fractal VJ · Queens, NY</p>
+  </footer>
+
+  <script>
+    document.querySelectorAll('.clip-item').forEach(item => {
+      const iframe = item.querySelector('iframe');
+      const autoSrc = item.dataset.src;
+      const staticSrc = iframe.src;
+
+      // Desktop: hover
+      item.addEventListener('mouseenter', () => {
+        iframe.src = autoSrc;
+      });
+      item.addEventListener('mouseleave', () => {
+        iframe.src = staticSrc;
+      });
+
+      // Mobile: tap to play, tap again to stop
+      item.addEventListener('click', () => {
+        if (iframe.src === staticSrc) {
+          iframe.src = autoSrc;
+          iframe.style.pointerEvents = 'auto';
+        } else {
+          iframe.src = staticSrc;
+          iframe.style.pointerEvents = 'none';
+        }
+      });
+    });
+  </script>
+</body>
+</html>
